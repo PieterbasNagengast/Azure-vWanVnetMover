@@ -5,7 +5,7 @@
 .DESCRIPTION
     This script moves VNET connections from one vWAN hub to another vWAN hub. The script reads a JSON file that contains the list of VNET connections to move. The script will remove the VNET connection from the source vWAN hub and connect it to the target vWAN hub. The script also updates the VNET DNS servers and enables PrivateEndpointNetworkPolicies on the VNET subnets.
 
-.PARAMETER target_vWanHubId
+.PARAMETER targetvWanHubId
     The target vWAN Hub ID in the format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}
 
 .PARAMETER vnetJsonFile
@@ -38,24 +38,24 @@
     None
 
 .EXAMPLE
-    .\Move-VNETconnections.ps1 -target_vWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect -VNET_DNSServers "1.2.3.4","6.7.8.9"
+    .\Move-VNETconnections.ps1 -targetvWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect -VNET_DNSServers "1.2.3.4","6.7.8.9"
 
-    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the target_vWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub. The script will also update the VNET DNS servers.
-
-.EXAMPLE
-    .\Move-VNETconnections.ps1 -target_vWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect
-
-    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the target_vWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub.
+    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the targetvWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub. The script will also update the VNET DNS servers.
 
 .EXAMPLE
-    .\Move-VNETconnections.ps1 -target_vWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json"
+    .\Move-VNETconnections.ps1 -targetvWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect
 
-    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the target_vWanHubId parameter. The script will only check if the VNET connections exist in the source vWAN hub.
+    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the targetvWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub.
+
+.EXAMPLE
+    .\Move-VNETconnections.ps1 -targetvWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json"
+
+    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the targetvWanHubId parameter. The script will only check if the VNET connections exist in the source vWAN hub.
 
 .EXAMPLE 
-    .\Move-VNETconnections.ps1 -target_vWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect -VNET_DNSServers "1.2.3.4","6.7.8.9" -EnablePrivateEndpointNetworkPolicies
+    .\Move-VNETconnections.ps1 -targetvWanHubId "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualHubs/{vWANHubName}" -vnetJsonFile "vnets.json" -RemoveAndConnect -VNET_DNSServers "1.2.3.4","6.7.8.9" -EnablePrivateEndpointNetworkPolicies
 
-    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the target_vWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub. The script will also enable PrivateEndpointNetworkPolicies on the VNET subnets. The script will also update the VNET DNS servers.
+    This example moves the VNET connections listed in the "vnets.json" file to the target vWAN hub specified by the targetvWanHubId parameter. The script will remove the VNET connections from the source vWAN hub and connect them to the target vWAN hub. The script will also enable PrivateEndpointNetworkPolicies on the VNET subnets. The script will also update the VNET DNS servers.
 
 .NOTES
     File Name      : Move-VNETconnections.ps1
@@ -66,7 +66,7 @@
 [CmdletBinding()] param(
     [parameter(Mandatory = $true)]
     [ValidatePattern('^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/virtualHubs/[^/]+$', ErrorMessage = "The target vWAN Hub ID is not in the correct format")]
-    [string]$target_vWanHubId,
+    [string]$targetvWanHubId,
     [parameter(Mandatory = $true)]
     [ValidateScript({ Test-Path $_ -PathType Leaf }, ErrorMessage = "The VNET JSON file does not exist")]
     [string]$vnetJsonFile,
@@ -85,11 +85,11 @@ $json = Get-Content $vnetJsonFile | ConvertFrom-Json
 $jobs = New-Object System.Collections.Generic.List[System.Object]
 $logs = New-Object System.Collections.Generic.List[System.Object]
 
-$target_vWanHubId_split = $target_vWanHubId.Split('/')
+$targetvWanHubId_split = $targetvWanHubId.Split('/')
 
 # write some stats before starting the jobs
 Write-Verbose "Total VNET connections to process: $($json.Count)"
-Write-Verbose "Target vWAN Hub: $($target_vWanHubId_split[-1])"
+Write-Verbose "Target vWAN Hub: $($targetvWanHubId_split[-1])"
 Write-Verbose "Remove and Connect: $RemoveAndConnect"
 Write-Verbose "VNET DNS Servers: $($VNET_DNSServers | ConvertTo-Json -Compress)"
 Write-Verbose "Starting jobs..."
@@ -99,7 +99,7 @@ $json | ForEach-Object {
     $jobs.Add(( start-job -ScriptBlock {
                 [CmdletBinding()] param (
                     [string]$source_HubConnectionId,
-                    [string[]]$target_vWanHubId_split,
+                    [string[]]$targetvWanHubId_split,
                     [bool]$RemoveAndConnect,
                     [string[]]$VNET_DNSServers,
                     [bool]$EnablePrivateEndpointNetworkPolicies
@@ -113,9 +113,9 @@ $json | ForEach-Object {
                 $source_HubVNETConnectionName = $source_HubConnectionId_split[-1]
 
                 # Variables for target vWAN hub
-                $target_subscriptionId = $target_vWanHubId_split[2]
-                $target_ResourceGroupName = $target_vWanHubId_split[4]
-                $target_HubName = $target_vWanHubId_split[8]
+                $target_subscriptionId = $targetvWanHubId_split[2]
+                $target_ResourceGroupName = $targetvWanHubId_split[4]
+                $target_HubName = $targetvWanHubId_split[8]
         
                 # STEP 1: Check if VNET connection exists in source vWAN hub
                 # switch to source vWAN hub subscription
@@ -211,7 +211,7 @@ $json | ForEach-Object {
                 }
 
 
-            } -ArgumentList $_, $target_vWanHubId_split, $RemoveAndConnect, $VNET_DNSServers, $EnablePrivateEndpointNetworkPolicies -Name $_.Split('/')[10]
+            } -ArgumentList $_, $targetvWanHubId_split, $RemoveAndConnect, $VNET_DNSServers, $EnablePrivateEndpointNetworkPolicies -Name $_.Split('/')[10]
         ))
 }
 
