@@ -85,6 +85,8 @@ $json = Get-Content $vnetJsonFile | ConvertFrom-Json
 $jobs = New-Object System.Collections.Generic.List[System.Object]
 $logs = New-Object System.Collections.Generic.List[System.Object]
 
+$logs.add("Starting Move-VNETconnections.ps1 script at: $(Get-Date)")
+
 $targetvWanHubId_split = $targetvWanHubId.Split('/')
 
 # write some stats before starting the jobs
@@ -92,6 +94,7 @@ Write-Verbose "Total VNET connections to process: $($json.Count)"
 Write-Verbose "Target vWAN Hub: $($targetvWanHubId_split[-1])"
 Write-Verbose "Remove and Connect: $RemoveAndConnect"
 Write-Verbose "VNET DNS Servers: $($VNET_DNSServers | ConvertTo-Json -Compress)"
+Write-Verbose "Enable PrivateEndpointNetworkPolicies: $EnablePrivateEndpointNetworkPolicies"
 Write-Verbose "Starting jobs..."
 
 # start jobs for each VNET connection
@@ -157,7 +160,7 @@ $json | ForEach-Object {
                             $context = Get-AzSubscription -SubscriptionId $vnetConnection_split[2] | Set-AzContext
                             Write-output "70/Switching to subscription: $($context.Subscription.Name)"
                 
-                            if ($VNET_DNSServers && $EnablePrivateEndpointNetworkPolicies) {
+                            if ($VNET_DNSServers || $EnablePrivateEndpointNetworkPolicies) {
                                 # update VNET DNS servers
                                 $vnet = get-azvirtualnetwork -ResourceGroupName $vnetConnection_split[4]  -Name $vnetConnection_split[-1] -ErrorAction SilentlyContinue
                                 Write-Output "75/Checking VNET: $($vnet.Name)"
@@ -170,16 +173,18 @@ $json | ForEach-Object {
                                     }
 
                                     # STEP 4b: Enable PrivateEndpointNetworkPolicies on VNET subnets
-                                    foreach ($subnet in $vnet.Subnets) {
-                                        if ($subnet.PrivateEndpoints) {
-                                            Write-Output "80/Private Endpoints found on subnet: $($subnet.Name)"
-                                            if ($subnet.PrivateEndpointNetworkPolicies -eq "Disabled") {
-                                                write-output "85/Enabling PrivateEndpointNetworkPolicies on subnet: $($subnet.Name)"
-                                                $subnet.PrivateEndpointNetworkPolicies = "Enabled"
+                                    if ($EnablePrivateEndpointNetworkPolicies) {
+                                        foreach ($subnet in $vnet.Subnets) {
+                                            if ($subnet.PrivateEndpoints) {
+                                                Write-Output "80/Private Endpoints found on subnet: $($subnet.Name)"
+                                                if ($subnet.PrivateEndpointNetworkPolicies -eq "Disabled") {
+                                                    write-output "80/Enabling PrivateEndpointNetworkPolicies on subnet: $($subnet.Name)"
+                                                    $subnet.PrivateEndpointNetworkPolicies = "Enabled"
+                                                }
                                             }
-                                        }
-                                        else {
-                                            Write-Output "80/No Private Endpoints found on subnet: $($subnet.Name)"
+                                            else {
+                                                Write-Output "80/No Private Endpoints found on subnet: $($subnet.Name)"
+                                            }
                                         }
                                     }
 
@@ -245,5 +250,7 @@ $jobs | ForEach-Object {
     $logs.Add("JobID: $($_.Id), Job: $($_.Name), Duration: $($duration)")
 
     Remove-Job -Job $_
+    $logs.Add("JobID: $($_.Id), Job: $($_.Name), Removed")
 }
+$logs.add("Completed Move-VNETconnections.ps1 script at: $(Get-Date)")
 $logs | Out-File -FilePath $logFile -Append
