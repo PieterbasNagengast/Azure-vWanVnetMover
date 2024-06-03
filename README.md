@@ -112,7 +112,7 @@ JobID: 13, Job: toVNET100, Output: 0/Switching to subscription: XXXXXXXXXXX
 JobID: 13, Job: toVNET100, Output: 10/Checked VNET Connection: toVNET100
 JobID: 13, Job: toVNET100, Output: 20/Removing VNET connection: toVNET100 from source vWAN hub
 JobID: 13, Job: toVNET100, Output: 30/removed VNET connection toVNET100 successfully
-JobID: 13, Job: toVNET100, Output: 40/Switching to subscription: ALZ - Connectivity
+JobID: 13, Job: toVNET100, Output: 40/Switching to subscription: XXXXXXXXXXX
 JobID: 13, Job: toVNET100, Output: 50/Connecting VNET connection toVNET100 to target vWAN hub
 JobID: 13, Job: toVNET100, Output: 60/moved VNET connection toVNET100 successfully
 JobID: 13, Job: toVNET100, Output: 70/Switching to subscription: XXXXXXXXXXX
@@ -128,7 +128,7 @@ JobID: 15, Job: toVNET68, Output: 0/Switching to subscription: XXXXXXXXXXX
 JobID: 15, Job: toVNET68, Output: 10/Checked VNET Connection: toVNET68
 JobID: 15, Job: toVNET68, Output: 20/Removing VNET connection: toVNET68 from source vWAN hub
 JobID: 15, Job: toVNET68, Output: 30/removed VNET connection toVNET68 successfully
-JobID: 15, Job: toVNET68, Output: 40/Switching to subscription: ALZ - Connectivity
+JobID: 15, Job: toVNET68, Output: 40/Switching to subscription: XXXXXXXXXXX
 JobID: 15, Job: toVNET68, Output: 50/Connecting VNET connection toVNET68 to target vWAN hub
 JobID: 15, Job: toVNET68, Output: 60/moved VNET connection toVNET68 successfully
 JobID: 15, Job: toVNET68, Output: 70/Switching to subscription: XXXXXXXXXXX
