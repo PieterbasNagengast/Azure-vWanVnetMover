@@ -5,7 +5,7 @@ param location string = deployment().location
 param ipCIDRrange string = '172.31.0.0/16'
 
 // Target vWAN
-param target_SubscriptionID string = 'aa66b139-0ef4-4018-8aa7-b9510bea120a'
+param target_SubscriptionID string
 param target_RGname string = 'rg-vwan-new'
 param target_vWANname string = 'vWAN-new'
 param target_vWANHUBname string = 'vWANHUB-new'
@@ -14,7 +14,7 @@ param target_vWANHUBname string = 'vWANHUB-new'
 var target_ipRange = cidrSubnet(ipCIDRrange, 24, 255)
 
 // source vWAN
-param source_SubscriptionID string = 'c99da9d5-3d84-4f22-a9ef-9f38db966440'
+param source_SubscriptionID string
 param source_RGname string = 'rg-vwan-old'
 param source_vWANname string = 'vWAN-old'
 param source_vWANHUBname string = 'vWANHUB-old'
@@ -23,7 +23,7 @@ param source_vWANHUBname string = 'vWANHUB-old'
 var source_ipRange = cidrSubnet(ipCIDRrange, 24, 0)
 
 // source VNETs
-param vnets_SubscriptionID string = '5a287c9e-8d7f-4a12-b74b-41d992cb3f56'
+param vnets_SubscriptionID string
 param vnets_RGname string = 'rg-vnets'
 param amountOfVNETs int = 100
 

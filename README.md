@@ -14,30 +14,33 @@
 
 ## Description
 
-The scripts in this repo can be used to move vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB. 
+The scripts in this repo can be used to move vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB. The **move-VNETconections.ps1** script will move the VNET connections from source vWAN HUB to target vWAN HUB.
 
 The **Generate-JSON.ps1** script will generate a JSON file that can be used as input on the **move-VNETconections.ps1** script to move the vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB.
 
 ## Use Cases
 
-In specifc scenario where you have a vWAN HUB with multiple VNET connections and you want to move these VNET connections to another vWAN HUB. lets say you have a old vWAN HUB and an new vWAN HUB.
+You can use this in specifc scenario where you have a vWAN HUB with multiple VNET connections and you want to move these VNET connections to another vWAN HUB. lets say you have a old vWAN HUB and an new vWAN HUB.
 
-- You have vWAN HUB which has lacks proper configuration and you want to move the VNET connections to a fresh new vWAN HUB which has new configuration.
+- You have extended an existing vWAN HUB with a extra HUB in same region and you want to move some or all VNET connections to the new HUB.
 - You have vWAN HUB which has custom route tables and you want to move to a fresh new vWAN HUB which has routing intent enabled.
 - You have a vWAN HUB in one region and you want to move the VNET connections to a vWAN HUB in another region.
 - You have a vWAN HUB in one subscription and you want to move the VNET connections to a vWAN HUB in another subscription.
 - You have a vWAN HUB in one resource group and you want to move the VNET connections to a vWAN HUB in another resource group.
 
+To achieve above scenarios, you can use the scripts in this repo to move the VNET connections from source vWAN HUB to target vWAN HUB.
+
 ## Parallel Jobs
 
-The powershell script **move-VNETconections.ps1** has been updated to run the move of the VNET connections in parallel. This will speed up the process of moving the VNET connections. This makes it possible to move a large number of VNET connections in a reasonable amount of time. Each Job runs the following steps in sequence:
+The powershell script **move-VNETconections.ps1** runs the move of the VNET connections in parallel. This will speed up the process of moving the VNET connections. This makes it possible to move a large number of VNET connections in a reasonable amount of time. Each Job runs the following steps in sequence:
 
 1. Check if the VNET connection exists in the source vWAN HUB
 2. Remove the VNET connection from the source vWAN HUB
 3. Create the VNET connection in the target vWAN HUB
 4. Adjust the DNS servers in the VNET to the specified DNS servers (if specified)
-5. Enable PrivateEndpointNetworkPolicy on each subnet where Private ENdpoints are connected to (if specified)
-   *Note: This is especially useful when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent)*
+5. Enable PrivateEndpointNetworkPolicy on each subnet where Private ENdpoints are connected to (if specified)*
+
+*Note: This is especially useful when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent)*
 
 ## Prerequisites
 
@@ -72,7 +75,7 @@ If you want to move specific vnet connections, please edit the JSON file and rem
 > This will only check if the VNET connections exist in the source vWAN HUB. It will not remove or move any VNET connection.
 
 ```powershell
-.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json"
+.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -verbose
 ```
 
 ### Step 3b: Move VNET connections from source vWAN HUB to target vWAN HUB
@@ -81,7 +84,7 @@ If you want to move specific vnet connections, please edit the JSON file and rem
 > This will move the VNET connections from source vWAN HUB to target vWAN HUB and remove the VNET connections from source vWAN HUB.
 
 ```powershell
-.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -removeandconnect
+.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -removeandconnect -verbose
 ```
 
 ### Step 3c: Move VNET connections from source vWAN HUB to target vWAN HUB and adjust DNS servers in VNET's
@@ -92,7 +95,7 @@ If you want to move specific vnet connections, please edit the JSON file and rem
 > If you don't specify the DNS servers, the existing DNS servers in the VNET's will be kept.
 
 ```powershell
-.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -RemoveAndConnect  -VNET_DNSServers "1.2.3.4","6.7.8.9"
+.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -RemoveAndConnect  -VNET_DNSServers "1.2.3.4","6.7.8.9" -verbose
 ```
 
 ## Logging
@@ -142,6 +145,3 @@ Completed Move-VNETconnections.ps1 script at: 06/01/2024 22:26:49
 Example output of console:
 
 ![Example Output of console](images/output1.png)
-
-
-![ada](images/UserCase1.gif)

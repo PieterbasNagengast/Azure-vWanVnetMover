@@ -81,12 +81,15 @@
     [string]$logFile = "move-VNETconnections.log"
 ) 
 
+# load the JSON file and create a empty list of jobs and logs
 $json = Get-Content $vnetJsonFile | ConvertFrom-Json
 $jobs = New-Object System.Collections.Generic.List[System.Object]
 $logs = New-Object System.Collections.Generic.List[System.Object]
 
+# write the start time to the log file
 $logs.add("Starting Move-VNETconnections.ps1 script at: $(Get-Date)")
 
+# split the target vWAN hub ID
 $targetvWanHubId_split = $targetvWanHubId.Split('/')
 
 # write some stats before starting the jobs
@@ -136,9 +139,11 @@ $json | ForEach-Object {
                         Write-Output "20/Removing VNET connection: $($vnetConnection.Name) from source vWAN hub"
                         $remove = Remove-AzVirtualHubVnetConnection -ResourceGroupName $source_ResourceGroupName -ParentResourceName $source_HubName -Name $source_HubVNETConnectionName -Force
                         if ($null -eq $remove) {
+                            # VNET connection removed successfully
                             Write-Output "30/removed VNET connection $($vnetConnection.Name) successfully"
                         }
                         else {
+                            # failed to remove VNET connection from source vWAN hub
                             Write-Output "30/FAILED: to remove VNET connection $($vnetConnection.Name) from source vWAN hub"
                             break
                         }
@@ -183,43 +188,51 @@ $json | ForEach-Object {
                                                 }
                                             }
                                             else {
+                                                # no private endpoints found on subnet
                                                 Write-Output "80/No Private Endpoints found on subnet: $($subnet.Name)"
                                             }
                                         }
                                     }
 
+                                    # update VNET
                                     $vnet = Set-AzVirtualNetwork -VirtualNetwork $vnet -ErrorAction SilentlyContinue
                                     if ($vnet) {
+                                        # VNET updated successfully
                                         Write-Output "90/VNET updated successfully on: $($vnet.Name)"
                                     }
                                 }
                                 else {
+                                    # VNET does not exist or is not accessible 
                                     Write-Output "90/FAILED: to update VNET: $($vnet.Name)"
                                 }                
                             }
                             else {
+                                # skip updating VNET DNS servers and PrivateEndpointNetworkPolicies
                                 Write-Output "75/Skipping VNET DNS server update and PrivateEndpointNetworkPolicies"
                             }
                         }
                         else {
+                            # failed to connect VNET connection to target vWAN hub
                             Write-Output "60/FAILED: to connect VNET connection $($vnetConnection.Name) to target vWAN hub"
                         }   
                     }
                     else {
+                        # skip removing and connecting VNET connection
                         Write-Output "10/Skipping VNET connection removal and connection"
                     }
-
+                    # completed processing VNET connection
                     Write-Output "100/Completed processing VNET connection: $($vnetConnection.Name)"
                 }
                 else {
+                    # VNET connection does not exist in source vWAN hub
                     Write-Output "0/FAILED: VNET connection: $($source_HubVNETConnectionName) does not exist in source vWAN hub"
                 }
-
 
             } -ArgumentList $_, $targetvWanHubId_split, $RemoveAndConnect, $VNET_DNSServers, $EnablePrivateEndpointNetworkPolicies -Name $_.Split('/')[10]
         ))
 }
 
+# wait for all jobs to complete and write progress to the console 
 while ($jobs | Where-Object { $_.State -eq 'Running' }) {
     foreach ($job in $jobs | Where-Object { $_.State -eq 'Running' }) {
         $output = Receive-Job -Job $job -Keep
@@ -236,8 +249,10 @@ while ($jobs | Where-Object { $_.State -eq 'Running' }) {
     } 
 }
 
+# write the final output to the console and log file
 $jobs | ForEach-Object {
     $output = Receive-Job -Job $_ 
+    # write the final output to the console
     Write-Output "JobID: $($_.Id), Job: $($_.Name), State: $($_.State) Status: $(($output[-1].ToString()).Split('/')[1])"
 
     # write log files based on output, append to existing file, include JobID and Job name
@@ -249,8 +264,11 @@ $jobs | ForEach-Object {
     $duration = (($_.PSEndTime - $_.PSBeginTime).ToString("mm'min:'ss'sec'"))
     $logs.Add("JobID: $($_.Id), Job: $($_.Name), Duration: $($duration)")
 
+    # remove the job
     Remove-Job -Job $_
-    $logs.Add("JobID: $($_.Id), Job: $($_.Name), Removed")
+    $logs.Add("JobID: $($_.Id), Job: $($_.Name), Job Removed")
 }
+
+# write the final output to the log file
 $logs.add("Completed Move-VNETconnections.ps1 script at: $(Get-Date)")
 $logs | Out-File -FilePath $logFile -Append
