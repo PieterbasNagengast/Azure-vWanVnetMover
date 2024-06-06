@@ -15,9 +15,9 @@
 
 ## Description
 
-The scripts in this repo can be used to move vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB. The **move-VNETconections.ps1** script will move the VNET connections from source vWAN HUB to target vWAN HUB.
+The scripts in this repo can be used to move vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB with Routing Intent enabled. The **move-VNETconections.ps1** script will move the VNET connections from source vWAN HUB to target vWAN HUB in jobs making it possible to move a large number of VNET connections in a reasonable amount of time. The script will also adjust the DNS servers in the VNET's to the specified DNS servers. If you don't specify the DNS servers, the existing DNS servers in the VNET's will be kept. The script will also enable PrivateEndpointNetworkPolicies on each subnet where Private Endpoints are connected to. This is required when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections to a Routing Intent enabled vWAN HUB.
 
-The **Generate-JSON.ps1** script will generate a JSON file that can be used as input on the **move-VNETconections.ps1** script to move the vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB.
+The **Generate-JSON.ps1** script generates a JSON file that is used as input for the **move-VNETconections.ps1** script to move the vWAN HUB VNET Connections from source vWAN HUB to an target vWAN HUB.
 
 ## Use Cases
 
