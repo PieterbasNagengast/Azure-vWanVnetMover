@@ -21,15 +21,20 @@ The **Generate-JSON.ps1** script will generate a JSON file that can be used as i
 
 ## Use Cases
 
-You can use this in specifc scenario where you have a vWAN HUB with multiple VNET connections and you want to move these VNET connections to another vWAN HUB. lets say you have a old vWAN HUB and an new vWAN HUB.
+You can use this in specifc scenario where you have a vWAN HUB with multiple VNET connections and you want to move these VNET connections to another vWAN HUB **including Routing Intent**. lets say you have a old vWAN HUB and an new vWAN HUB.
 
-- You have extended an existing vWAN HUB with a extra HUB in same region and you want to move some or all VNET connections to the new HUB.
-- You have vWAN HUB which has custom route tables and you want to move to a fresh new vWAN HUB which has routing intent enabled.
-- You have a vWAN HUB in one region and you want to move the VNET connections to a vWAN HUB in another region.
-- You have a vWAN HUB in one subscription and you want to move the VNET connections to a vWAN HUB in another subscription.
-- You have a vWAN HUB in one resource group and you want to move the VNET connections to a vWAN HUB in another resource group.
+- You have added an extra HUB within the same vWAN (Single vWAN). On the new HUB you have enabled Routing Intent and you want to move the VNET connections from the old HUB to the new HUB.
+- You have created a new vWAN (Double vWAN) including a HUB with Routing Intent enabled and you want to move the VNET connections from an existing vWAN HUB to the new vWAN HUB.
 
 To achieve above scenarios, you can use the scripts in this repo to move the VNET connections from source vWAN HUB to target vWAN HUB.
+
+> [!NOTE]
+> The scripts will **ONLY** move the VNET connections from source vWAN HUB to target vWAN HUB with **Routing Intent enabled!**. If you are migrating from one vWAN HUB to another vWAN HUB, you need to make sure that the target vWAN HUB is configured correctly and that all other services like VPN S2S and/or P2S, ExpressRoute, Firewall, etc. are configured correctly in the target vWAN HUB.
+> The scripts will **not** move the VPN, ExpressRoute, Firewall, etc. configurations from source vWAN HUB to target vWAN HUB.
+
+| Move VNET's between vWAN's | Move VNETs between Hubs in Single vWAN |
+| --- | --- |
+|![DoubleVWAN](images/DoubleVWAN.gif)| ![SingleVWAN](images/SingleVWAN.gif)|
 
 ## Parallel Jobs
 
@@ -38,10 +43,10 @@ The powershell script **move-VNETconections.ps1** runs the move of the VNET conn
 1. Check if the VNET connection exists in the source vWAN HUB
 2. Remove the VNET connection from the source vWAN HUB
 3. Create the VNET connection in the target vWAN HUB
-4. Adjust the DNS servers in the VNET to the specified DNS servers (if specified)
-5. Enable PrivateEndpointNetworkPolicy on each subnet where Private ENdpoints are connected to (if specified)*
+4. (optional) Adjust the DNS servers in the VNET to the specified DNS servers
+5. (optional) Enable PrivateEndpointNetworkPolicy on each subnet with Private Endpoints*
 
-*Note: This is especially useful when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies#:~:text=If%20you%27re%20using%20Private,configured%20on%20the%20hub.)*
+*Note: This required when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies#:~:text=If%20you%27re%20using%20Private,configured%20on%20the%20hub.)*
 
 ## Prerequisites
 
