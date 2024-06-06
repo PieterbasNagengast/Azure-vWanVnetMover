@@ -10,6 +10,7 @@
    3. [Step 3a: Only check VNET connections exist in source vWAN HUB](#step-3a-only-check-vnet-connections-exist-in-source-vwan-hub)
    4. [Step 3b: Move VNET connections from source vWAN HUB to target vWAN HUB](#step-3b-move-vnet-connections-from-source-vwan-hub-to-target-vwan-hub)
    5. [Step 3c: Move VNET connections from source vWAN HUB to target vWAN HUB and adjust DNS servers in VNET's](#step-3c-move-vnet-connections-from-source-vwan-hub-to-target-vwan-hub-and-adjust-dns-servers-in-vnets)
+   6. [Step 3d: Move VNET connections from source vWAN HUB to target vWAN HUB and adjust DNS servers in VNET's and enable PrivateEndpointNetworkPolicies on subnets](#step-3d-move-vnet-connections-from-source-vwan-hub-to-target-vwan-hub-and-adjust-dns-servers-in-vnets-and-enable-privateendpointnetworkpolicies-on-subnets)
 6. [Logging](#logging)
 
 ## Description
@@ -40,7 +41,7 @@ The powershell script **move-VNETconections.ps1** runs the move of the VNET conn
 4. Adjust the DNS servers in the VNET to the specified DNS servers (if specified)
 5. Enable PrivateEndpointNetworkPolicy on each subnet where Private ENdpoints are connected to (if specified)*
 
-*Note: This is especially useful when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent)*
+*Note: This is especially useful when moving VNET connections to a vWAN HUB with Routing Intent enabled. This will make sure that the Private Endpoints are still reachable after moving the VNET connections. ref: [https://docs.microsoft.com/en-us/azure/virtual-wan/virtual-wan-routing-intent](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies#:~:text=If%20you%27re%20using%20Private,configured%20on%20the%20hub.)*
 
 ## Prerequisites
 
@@ -96,6 +97,18 @@ If you want to move specific vnet connections, please edit the JSON file and rem
 
 ```powershell
 .\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -RemoveAndConnect  -VNET_DNSServers "1.2.3.4","6.7.8.9" -verbose
+```
+
+### Step 3d: Move VNET connections from source vWAN HUB to target vWAN HUB and adjust DNS servers in VNET's and enable PrivateEndpointNetworkPolicies on subnets
+
+> [!WARNING]
+> This will move the VNET connections from source vWAN HUB to target vWAN HUB and remove the VNET connections from source vWAN HUB.
+> This will also adjust the DNS servers in the VNET's to the specified DNS servers. Most likely the DNS servers of the target vWAN HUB are different from the source vWAN HUB. 
+> If you don't specify the DNS servers, the existing DNS servers in the VNET's will be kept.
+> This will also enable PrivateEndpointNetworkPolicies on each subnet where Private Endpoints are connected to.
+
+```powershell
+.\move-VNETconections.ps1 -target_vWanHubId "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyNewvWANHub" -vnetJsonFile "VnetConnections.json" -RemoveAndConnect  -VNET_DNSServers "1.2.3.4" -EnablePrivateEndpointNetworkPolicies -verbose
 ```
 
 ## Logging
