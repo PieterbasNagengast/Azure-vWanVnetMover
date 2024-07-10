@@ -137,14 +137,14 @@ $json | ForEach-Object {
 
                         # STEP 2: Remove VNET connection from source vWAN hub
                         Write-Output "20/Removing VNET connection: $($vnetConnection.Name) from source vWAN hub"
-                        $remove = Remove-AzVirtualHubVnetConnection -ResourceGroupName $source_ResourceGroupName -ParentResourceName $source_HubName -Name $source_HubVNETConnectionName -Force
-                        if ($null -eq $remove) {
-                            # VNET connection removed successfully
+                        try {
+                            Remove-AzVirtualHubVnetConnection -ResourceGroupName $source_ResourceGroupName -ParentResourceName $source_HubName -Name $source_HubVNETConnectionName -Force -ErrorAction Stop
+                            # If the command above fails, it will jump to catch block, otherwise it continues here.
                             Write-Output "30/removed VNET connection $($vnetConnection.Name) successfully"
                         }
-                        else {
-                            # failed to remove VNET connection from source vWAN hub
-                            Write-Output "30/FAILED: to remove VNET connection $($vnetConnection.Name) from source vWAN hub"
+                        catch {
+                            # If any error occurs, it is caught here.
+                            Write-Output "30/FAILED: to remove VNET connection $($vnetConnection.Name) from source vWAN hub. Error: $_"
                             break
                         }
         
